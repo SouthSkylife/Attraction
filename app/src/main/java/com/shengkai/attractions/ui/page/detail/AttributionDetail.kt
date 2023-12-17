@@ -1,16 +1,13 @@
-package com.shengkai.attractions.ui.`fun`.news
+package com.shengkai.attractions.ui.page.detail
 
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 
-class AttributionNews : Fragment() {
+class AttributionDetail : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

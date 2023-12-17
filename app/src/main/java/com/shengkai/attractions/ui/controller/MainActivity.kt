@@ -1,30 +1,23 @@
 package com.shengkai.attractions.ui.controller
 
 import android.annotation.SuppressLint
-import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.WindowManager
-import android.widget.Toast
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shengkai.attractions.R
 import com.shengkai.attractions.base.iFragmentTransactionCallback
 import com.shengkai.attractions.common.FragmentAnim
 import com.shengkai.attractions.data.AttractionDetail
-import com.shengkai.attractions.data.AttractionInfoModel
 import com.shengkai.attractions.databinding.ActivityMainBinding
-import com.shengkai.attractions.repo.AttributionInfoRepo
 import com.shengkai.attractions.ui.detail.AttributionDetailAdapter
+import com.shengkai.attractions.ui.page.news.AttributionNews
 import com.shengkai.attractions.ui.news.AttributionNewsAdapter
-import com.shengkai.attractions.util.GeneralUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
@@ -32,7 +25,7 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     private lateinit var viewModel: MainActivityViewModel
     private lateinit var attractionNewsAdapter: AttributionNewsAdapter
     private lateinit var attractionDetailAdapter: AttributionDetailAdapter
-    private val containerId = 0
+    private var isFirstLoad: Boolean = true
 
     private var fragmentManager: FragmentManager = supportFragmentManager
 
@@ -51,9 +44,15 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
     override fun onStart() {
         super.onStart()
-        viewModel.getAttributionNews()
-        viewModel.getAttributionList()
+        if (isFirstLoad) {
+            isFirstLoad = false
+            binding.progressBar.visibility = View.VISIBLE
+            viewModel.getAttributionNews()
+            viewModel.getAttributionList()
+        }
     }
+
+    //-------------------------------------- init ----------------------------------------------//
 
     private fun init() {
         // 初始化 Data Binding
@@ -74,6 +73,7 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         viewModel.attractionInfoData.observe(
             this
         ) {
+            binding.progressBar.visibility = View.GONE
             binding.tvAttributionCount.text =
                 "台北市景點 ${viewModel.attractionInfoPage}/${it.total}"
             attractionDetailAdapter.setAttractionDetailList(it.data)
@@ -86,7 +86,8 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     private fun initNewsComponent() {
         // 初始化 Adapter，並設置點擊監聽器
         attractionNewsAdapter = AttributionNewsAdapter { newsUrl: String ->
-            println("最新消息網址${newsUrl}")
+            //println("最新消息網址${newsUrl}")
+            jumpToAttributionNewsPage(newsUrl)
         }
 
         // 設置 RecyclerView 的 Adapter
@@ -112,10 +113,20 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.rcyAttribution.layoutManager = LinearLayoutManager(this)
     }
 
-    //--------------------- Fragment Handle -----------------------------------//
+    //-------------------------------------- Action------- --------------------------------------//
+
+    private fun jumpToAttributionNewsPage(newsUrl: String) {
+        addFragment(AttributionNews().apply {
+            arguments = Bundle().apply {
+                putString(AttributionNews.ATTRIBUTION_NEWS_KEY, newsUrl)
+            }
+        })
+    }
+
+    //---------------------------------- Fragment Handle ----------------------------------------//
 
     override fun addFragment(fragment: Fragment) {
-        this.addFragment(fragment, containerId, FragmentAnim.SLIDE)
+        this.addFragment(fragment, R.id.fragmentContainer, FragmentAnim.SLIDE)
     }
 
     @SuppressLint("CommitTransaction")
