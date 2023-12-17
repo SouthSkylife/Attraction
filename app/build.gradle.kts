@@ -10,6 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.shengkai.attractions"
         minSdk = 24
+        //noinspection OldTargetApi
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
