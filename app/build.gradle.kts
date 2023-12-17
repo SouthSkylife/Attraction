@@ -80,6 +80,6 @@ dependencies {
     //Glide
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.github.bumptech.glide:compiler:4.12.0")
-
+    implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
 
 }

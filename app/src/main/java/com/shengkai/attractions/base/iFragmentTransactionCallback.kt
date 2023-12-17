@@ -1,7 +1,7 @@
 package com.shengkai.attractions.base
 
 import androidx.fragment.app.Fragment
-import com.shengkai.attractions.common.FragmentAnim
+import com.shengkai.attractions.common.constant.FragmentAnim
 
 interface iFragmentTransactionCallback {
 

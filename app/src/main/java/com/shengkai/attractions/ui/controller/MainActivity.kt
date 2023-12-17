@@ -10,14 +10,18 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import com.shengkai.attractions.R
 import com.shengkai.attractions.base.iFragmentTransactionCallback
-import com.shengkai.attractions.common.FragmentAnim
+import com.shengkai.attractions.common.constant.FragmentAnim
+import com.shengkai.attractions.common.dialog.LanguageSelectionDialog
 import com.shengkai.attractions.data.AttractionDetail
 import com.shengkai.attractions.databinding.ActivityMainBinding
 import com.shengkai.attractions.ui.detail.AttributionDetailAdapter
-import com.shengkai.attractions.ui.page.news.AttributionNews
 import com.shengkai.attractions.ui.news.AttributionNewsAdapter
+import com.shengkai.attractions.ui.page.detail.AttributionDetailPage
+import com.shengkai.attractions.ui.page.news.AttributionNewsPage
+import com.shengkai.attractions.ui.page.web.WebViewBoardPage
 
 class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
@@ -39,6 +43,7 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         init()
         initNewsComponent()
         initDetailComponent()
+        registerListener()
         bindObserver()
     }
 
@@ -103,7 +108,8 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     private fun initDetailComponent() {
         // 初始化 Adapter，並設置點擊監聽器
         attractionDetailAdapter = AttributionDetailAdapter { detail: AttractionDetail ->
-            println("景觀網址${detail.url}")
+            //println("景觀網址${detail.url}")
+            jumpToAttributionDetailPage(detail)
         }
 
         // 設置 RecyclerView 的 Adapter
@@ -113,14 +119,33 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.rcyAttribution.layoutManager = LinearLayoutManager(this)
     }
 
+    private fun registerListener(){
+        binding.ivLanguage.setOnClickListener {
+            showLanguageSelectDialog()
+        }
+    }
+
     //-------------------------------------- Action------- --------------------------------------//
 
     private fun jumpToAttributionNewsPage(newsUrl: String) {
-        addFragment(AttributionNews().apply {
+        addFragment(AttributionNewsPage().apply {
             arguments = Bundle().apply {
-                putString(AttributionNews.ATTRIBUTION_NEWS_KEY, newsUrl)
+                putString(WebViewBoardPage.WEB_BOARD_URL_KEY, newsUrl)
             }
         })
+    }
+
+    private fun jumpToAttributionDetailPage(detail: AttractionDetail) {
+        addFragment(AttributionDetailPage().apply {
+            arguments = Bundle().apply {
+                putString(AttributionDetailPage.ATTRIBUTION_DETAIL_KEY, Gson().toJson(detail))
+            }
+        })
+    }
+
+    private fun showLanguageSelectDialog(){
+        val dialog = LanguageSelectionDialog()
+        dialog.show(fragmentManager,"show")
     }
 
     //---------------------------------- Fragment Handle ----------------------------------------//

@@ -3,11 +3,9 @@ package com.shengkai.attractions.ui.page.news
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -21,7 +19,10 @@ import com.shengkai.attractions.R
 import com.shengkai.attractions.databinding.FragmentAttributionNewsBinding
 import com.shengkai.attractions.ui.controller.MainActivity
 
-class AttributionNews : Fragment() {
+/**
+ * 最新消息細節(已用 WebViewBoard 取代)
+ */
+class AttributionNewsPage : Fragment() {
 
     private lateinit var binding: FragmentAttributionNewsBinding
     private lateinit var viewModel: AttributionNewsViewModel
@@ -54,7 +55,11 @@ class AttributionNews : Fragment() {
     ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_attribution_news, container, false)
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.ivBack.setOnClickListener {
             mainActivity.popBackStack()
@@ -66,8 +71,6 @@ class AttributionNews : Fragment() {
         newsUrl = arguments?.getString(ATTRIBUTION_NEWS_KEY) ?: ""
 
         setUpWebView()
-
-        return binding.root
     }
 
     override fun onStart() {
