@@ -1,4 +1,6 @@
 package com.shengkai.attractions.ui.page.detail
 
-class AttributionDetailViewModel {
+import androidx.lifecycle.ViewModel
+
+class AttributionDetailViewModel : ViewModel(){
 }

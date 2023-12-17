@@ -1,5 +1,7 @@
 package com.shengkai.attractions.data
 
+import com.google.gson.annotations.SerializedName
+
 data class AttractionInfoModel(
     val total: Int,
     val data: List<AttractionDetail>
@@ -9,6 +11,8 @@ data class AttractionDetail(
     val id: Int,
     val name: String,
     val introduction: String,
+    @SerializedName("open_time")
+    val openTime:String,
     val zipcode: String,
     val address: String,
     val tel: String,

@@ -1,4 +1,4 @@
-package com.shengkai.attractions.common
+package com.shengkai.attractions.common.constant
 
 object AppConstant {
     object Key {
