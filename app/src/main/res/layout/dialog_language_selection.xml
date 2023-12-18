@@ -25,7 +25,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="start"
-                android:text="選擇語言"
+                android:text="@string/txt_select_language"
                 android:textColor="@color/color_moon_grey"
                 android:textSize="20sp"
                 android:textStyle="bold" />
@@ -34,7 +34,6 @@
                 android:id="@+id/rcyLanguage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:listitem="@layout/item_language"
                 android:scrollbars="vertical"
                 android:layout_marginTop="10dp" />
 

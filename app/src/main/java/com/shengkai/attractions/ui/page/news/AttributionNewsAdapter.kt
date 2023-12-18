@@ -1,14 +1,11 @@
 package com.shengkai.attractions.ui.news
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.shengkai.attractions.data.AttractionData
-import com.shengkai.attractions.data.AttributionNewsModel
+import com.shengkai.attractions.data.remote.AttractionData
 import com.shengkai.attractions.databinding.ItemAttributionNewsBinding
-import com.shengkai.attractions.util.GlideLoadUtil
 
 class AttributionNewsAdapter (
     private val onAttractionClick: (String) -> Unit

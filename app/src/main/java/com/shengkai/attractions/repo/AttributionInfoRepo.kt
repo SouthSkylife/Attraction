@@ -3,18 +3,15 @@ package com.shengkai.attractions.repo
 import androidx.lifecycle.MutableLiveData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.shengkai.attractions.data.ApiService
-import com.shengkai.attractions.data.AttractionInfoModel
-import com.shengkai.attractions.data.AttributionNewsModel
+import com.shengkai.attractions.data.remote.AttractionInfoModel
+import com.shengkai.attractions.data.remote.AttributionNewsModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 /**
  * 景點資料存取介面(採用 OkHttp3，Retrofit for kotlin 建構中)
@@ -33,8 +30,6 @@ class AttributionInfoRepo {
                 val url =
                     "https://www.travel.taipei/open-api/$language/Events/News".toHttpUrlOrNull()
                         ?.newBuilder()
-                        ?.addQueryParameter("begin", "2023-01-01")
-                        ?.addQueryParameter("end", "2023-12-31")
                         ?.addQueryParameter("page", "1")
                         ?.build()
 
@@ -79,7 +74,7 @@ class AttributionInfoRepo {
      */
     fun getAttributionList(
         language: String,
-        page : Int,
+        page : Int?,
         attractionInfoData: MutableLiveData<AttractionInfoModel>
     ) {
         runBlocking {
@@ -105,6 +100,7 @@ class AttributionInfoRepo {
                         }
 
                         override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+
                             response.use {
                                 if (response.isSuccessful) {
                                     // 處理 API 響應，這裡你可以獲取 JSON 數據並進行相應的處理

@@ -1,8 +1,12 @@
 package com.shengkai.attractions.ui.controller
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -10,25 +14,32 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.shengkai.attractions.R
 import com.shengkai.attractions.base.iFragmentTransactionCallback
 import com.shengkai.attractions.common.constant.FragmentAnim
 import com.shengkai.attractions.common.dialog.LanguageSelectionDialog
-import com.shengkai.attractions.data.AttractionDetail
+import com.shengkai.attractions.data.local.ApplicationSp
+import com.shengkai.attractions.data.remote.AttractionDetail
 import com.shengkai.attractions.databinding.ActivityMainBinding
 import com.shengkai.attractions.ui.detail.AttributionDetailAdapter
 import com.shengkai.attractions.ui.news.AttributionNewsAdapter
 import com.shengkai.attractions.ui.page.detail.AttributionDetailPage
 import com.shengkai.attractions.ui.page.news.AttributionNewsPage
 import com.shengkai.attractions.ui.page.web.WebViewBoardPage
+import java.util.Locale
 
+/**
+ * 主畫面(最新消息/遊憩景點/多國語系切換)
+ */
 class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainActivityViewModel
     private lateinit var attractionNewsAdapter: AttributionNewsAdapter
     private lateinit var attractionDetailAdapter: AttributionDetailAdapter
+    private lateinit var layoutManager: LinearLayoutManager
     private var isFirstLoad: Boolean = true
 
     private var fragmentManager: FragmentManager = supportFragmentManager
@@ -37,12 +48,11 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         const val TAG = "MainActivity"
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
         initNewsComponent()
-        initDetailComponent()
+        initAttractionsComponent()
         registerListener()
         bindObserver()
     }
@@ -52,8 +62,8 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         if (isFirstLoad) {
             isFirstLoad = false
             binding.progressBar.visibility = View.VISIBLE
-            viewModel.getAttributionNews()
-            viewModel.getAttributionList()
+            viewModel.getAttributionNews(this)
+            viewModel.getAttributionList(this)
         }
     }
 
@@ -65,13 +75,17 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.lifecycleOwner = this
         //獲取 ViewModel
         viewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
+        setLanguageLocale()
     }
 
     @SuppressLint("SetTextI18n")
     private fun bindObserver() {
         //台北市最新消息
         viewModel.attributionNewsData.observe(this) {
-            attractionNewsAdapter.setAttractionList(it.data)
+            binding.tvNoNewsHint.visibility = if (it.data.isEmpty()) View.VISIBLE else View.GONE
+            attractionNewsAdapter.setAttractionList(
+                if (it.data.size > 3) it.data.subList(0, 3) else it.data
+            )
         }
 
         //台北市景點
@@ -79,8 +93,7 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
             this
         ) {
             binding.progressBar.visibility = View.GONE
-            binding.tvAttributionCount.text =
-                "台北市景點 ${viewModel.attractionInfoPage}/${it.total}"
+            binding.tvCount.text = "${viewModel.attractionInfoPage}/${it.total}"
             attractionDetailAdapter.setAttractionDetailList(it.data)
         }
     }
@@ -91,7 +104,6 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     private fun initNewsComponent() {
         // 初始化 Adapter，並設置點擊監聽器
         attractionNewsAdapter = AttributionNewsAdapter { newsUrl: String ->
-            //println("最新消息網址${newsUrl}")
             jumpToAttributionNewsPage(newsUrl)
         }
 
@@ -103,12 +115,11 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     }
 
     /**
-     * 初始化最新消息組件
+     * 初始化遊憩景點組件
      */
-    private fun initDetailComponent() {
+    private fun initAttractionsComponent() {
         // 初始化 Adapter，並設置點擊監聽器
         attractionDetailAdapter = AttributionDetailAdapter { detail: AttractionDetail ->
-            //println("景觀網址${detail.url}")
             jumpToAttributionDetailPage(detail)
         }
 
@@ -116,10 +127,11 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.rcyAttribution.adapter = attractionDetailAdapter
 
         // 設置 RecyclerView 的 LayoutManager（這裡使用 LinearLayoutManager）
-        binding.rcyAttribution.layoutManager = LinearLayoutManager(this)
+        layoutManager = LinearLayoutManager(this)
+        binding.rcyAttribution.layoutManager = layoutManager
     }
 
-    private fun registerListener(){
+    private fun registerListener() {
         binding.ivLanguage.setOnClickListener {
             showLanguageSelectDialog()
         }
@@ -128,9 +140,13 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     //-------------------------------------- Action------- --------------------------------------//
 
     private fun jumpToAttributionNewsPage(newsUrl: String) {
-        addFragment(AttributionNewsPage().apply {
+        addFragment(WebViewBoardPage().apply {
             arguments = Bundle().apply {
                 putString(WebViewBoardPage.WEB_BOARD_URL_KEY, newsUrl)
+                putString(
+                    WebViewBoardPage.WEB_BOARD_TITLE_KEY,
+                    binding.tvLatestNewsTag.text.toString()
+                )
             }
         })
     }
@@ -143,9 +159,48 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         })
     }
 
-    private fun showLanguageSelectDialog(){
-        val dialog = LanguageSelectionDialog()
-        dialog.show(fragmentManager,"show")
+    private fun showLanguageSelectDialog() {
+        val dialog = LanguageSelectionDialog {
+            setLanguageLocale()
+            binding.progressBar.visibility = View.VISIBLE
+            viewModel.getAttributionNews(this)
+            viewModel.getAttributionList(this)
+        }
+
+        dialog.show(fragmentManager, "show")
+    }
+
+    private fun setLanguageLocale() {
+        val localSp = ApplicationSp(this)
+
+        if (localSp.getString(ApplicationSp.CURRENT_LANGUAGE_SIGN).isEmpty()) {
+            localSp.putString(ApplicationSp.CURRENT_LANGUAGE_SIGN, "zh-tw")
+        }
+
+        val language = localSp.getString(ApplicationSp.CURRENT_LANGUAGE_SIGN)
+
+        val locale: Locale = if (language.contains("-")) {
+            val (lang, country) = language.split("-")
+            Locale(lang, country)
+        } else {
+            Locale(language, "")
+        }
+
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        resetAllComponentLanguage()
+    }
+
+    private fun resetAllComponentLanguage() {
+        binding.tvTitle.text = getString(R.string.txt_travel_taipei)
+        binding.tvCountTitle.text = getString(R.string.txt_taipei_attribution)
+        binding.tvLatestNewsTag.text = getString(R.string.txt_latest_news)
+        binding.tvAttributionTag.text = getString(R.string.txt_travel_attribution)
+        binding.tvNoNewsHint.text = getString(R.string.txt_no_news_error_hint)
     }
 
     //---------------------------------- Fragment Handle ----------------------------------------//

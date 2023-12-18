@@ -40,6 +40,8 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/guideline2"
                 app:layout_constraintStart_toStartOf="@+id/guideline1"
@@ -93,8 +95,16 @@
                         app:iss_auto_cycle="true"
                         app:iss_period="1500"
                         app:iss_delay="1000"
+                        android:visibility="visible"
                         app:iss_error_image="@drawable/ic_empty_photo"
                         app:iss_text_align="CENTER"/>
+
+                    <ImageView
+                        android:id="@+id/ivEmptySlider"
+                        android:layout_height="match_parent"
+                        android:layout_width="match_parent"
+                        android:visibility="gone"
+                        android:src="@drawable/ic_empty_photo"/>
 
                 </LinearLayout>
 
@@ -117,7 +127,7 @@
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="營業時間："
+                        android:text="@string/txt_business_hour"
                         android:textColor="@color/color_moon_grey"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -150,7 +160,7 @@
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="營業地址："
+                        android:text="@string/txt_business_address"
                         android:textColor="@color/color_moon_grey"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -183,7 +193,7 @@
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="聯絡電話："
+                        android:text="@string/txt_contact_number"
                         android:textColor="@color/color_moon_grey"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -216,7 +226,7 @@
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="參考網址："
+                        android:text="@string/txt_reference_url"
                         android:textColor="@color/color_moon_grey"
                         android:textSize="18sp"
                         android:textStyle="bold" />

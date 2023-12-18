@@ -1,4 +1,4 @@
-package com.shengkai.attractions.data
+package com.shengkai.attractions.data.remote
 
 data class AttributionNewsModel(
     val total: Int,

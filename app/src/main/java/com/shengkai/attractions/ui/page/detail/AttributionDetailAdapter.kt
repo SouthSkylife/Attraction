@@ -5,11 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.shengkai.attractions.R
-import com.shengkai.attractions.data.AttractionData
-import com.shengkai.attractions.data.AttractionDetail
+import com.shengkai.attractions.data.remote.AttractionDetail
 import com.shengkai.attractions.databinding.ItemAttributionDetailBinding
-import com.shengkai.attractions.databinding.ItemAttributionNewsBinding
-import com.shengkai.attractions.ui.news.AttributionNewsAdapter
 import com.shengkai.attractions.util.GlideLoadUtil
 
 class AttributionDetailAdapter(
@@ -22,6 +19,7 @@ class AttributionDetailAdapter(
     fun setAttractionDetailList(list: List<AttractionDetail>) {
         attractionList = list
         notifyDataSetChanged()
+        //notifyItemRangeInserted(attractionList.size - 1, list.size)
     }
 
     // define ViewHolder

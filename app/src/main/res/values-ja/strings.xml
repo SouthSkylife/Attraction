@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">アトラクション</string>
+    <string name="txt_travel_taipei">台北をのんびり旅しよう</string>
+    <string name="txt_taipei_attribution">台北市の観光スポット</string>
+    <string name="txt_latest_news">最新ニュース</string>
+    <string name="txt_travel_attribution">アトラクション</string>
+    <string name="txt_no_news_error_hint">現時点では新しいニュースはありません！</string>
+    <string name="txt_select_language">言語を選択してください</string>
+
+    <string name="txt_business_hour">営業時間：</string>
+    <string name="txt_business_address">職場の住所：</string>
+    <string name="txt_contact_number">連絡先番号：</string>
+    <string name="txt_reference_url">参考URL：</string>
+
+</resources>

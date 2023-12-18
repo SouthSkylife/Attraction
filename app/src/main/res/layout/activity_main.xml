@@ -23,10 +23,12 @@
                 android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="悠遊台北"
+                android:text="@string/txt_travel_taipei"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -66,11 +68,11 @@
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
                 <TextView
-                    android:id="@+id/tvAttributionCount"
+                    android:id="@+id/tvCountTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
-                    android:text="台北市景點 1/145"
+                    android:text="@string/txt_taipei_attribution"
                     android:textColor="@color/color_warm_grey"
                     android:textSize="16sp"
                     android:textStyle="normal"
@@ -78,7 +80,19 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/textView3"
+                    android:id="@+id/tvCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/color_warm_grey"
+                    android:textSize="16sp"
+                    android:textStyle="normal"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvCountTitle"
+                    app:layout_constraintStart_toEndOf="@+id/tvCountTitle"
+                    app:layout_constraintTop_toTopOf="@+id/tvCountTitle" />
+
+                <TextView
+                    android:id="@+id/tvLatestNewsTag"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -88,12 +102,26 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="最新消息"
+                    android:text="@string/txt_latest_news"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="normal"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvAttributionCount" />
+                    app:layout_constraintTop_toBottomOf="@+id/tvCount" />
+
+                <TextView
+                    android:id="@+id/tvNoNewsHint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txt_no_news_error_hint"
+                    android:textColor="@color/color_warm_grey"
+                    android:textSize="12sp"
+                    android:visibility="gone"
+                    android:layout_marginStart="5dp"
+                    android:textStyle="normal"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvLatestNewsTag"
+                    app:layout_constraintStart_toEndOf="@+id/tvLatestNewsTag"
+                    app:layout_constraintTop_toTopOf="@+id/tvLatestNewsTag" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcyNews"
@@ -103,10 +131,10 @@
                     android:nestedScrollingEnabled="false"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView3" />
+                    app:layout_constraintTop_toBottomOf="@+id/tvLatestNewsTag" />
 
                 <TextView
-                    android:id="@+id/textView4"
+                    android:id="@+id/tvAttributionTag"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
@@ -116,7 +144,7 @@
                     android:paddingTop="5dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="5dp"
-                    android:text="遊憩景點"
+                    android:text="@string/txt_travel_attribution"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="normal"
@@ -134,7 +162,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView4"
+                    app:layout_constraintTop_toBottomOf="@+id/tvAttributionTag"
                     app:layout_constraintVertical_bias="0.0" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

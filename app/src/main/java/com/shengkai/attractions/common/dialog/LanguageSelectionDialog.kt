@@ -2,6 +2,7 @@ package com.shengkai.attractions.common.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,11 +16,14 @@ import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shengkai.attractions.R
 import com.shengkai.attractions.common.adapter.LanguageSelectAdapter
+import com.shengkai.attractions.common.constant.LanguageEnum
+import com.shengkai.attractions.data.local.ApplicationSp
 import com.shengkai.attractions.databinding.DialogLanguageSelectionBinding
 import com.shengkai.attractions.databinding.FragmentAttributionDetailBinding
 import java.lang.Exception
 
-class LanguageSelectionDialog : DialogFragment() {
+class LanguageSelectionDialog(private val onLanguageClick: () -> Unit) :
+    DialogFragment() {
     private lateinit var binding: DialogLanguageSelectionBinding
     private lateinit var adapter: LanguageSelectAdapter
 
@@ -40,7 +44,7 @@ class LanguageSelectionDialog : DialogFragment() {
             cancel()
         }
 
-        initLanguageComponent()
+        initLanguageComponent(binding.root.context)
 
         return binding.root
     }
@@ -83,9 +87,17 @@ class LanguageSelectionDialog : DialogFragment() {
         }
     }
 
-    private fun initLanguageComponent() {
+    private fun initLanguageComponent(context: Context) {
         adapter = LanguageSelectAdapter {
-            println("選擇語言${it.languageName}")
+            val pastLanguage =
+                ApplicationSp(context).getString(ApplicationSp.CURRENT_LANGUAGE_SIGN, "zh-tw")
+
+            if(pastLanguage != it.languageSign){
+                ApplicationSp(context).putString(ApplicationSp.CURRENT_LANGUAGE_SIGN, it.languageSign)
+                onLanguageClick()
+            }
+
+            dismiss()
         }
 
         binding.rcyLanguage.adapter = adapter
