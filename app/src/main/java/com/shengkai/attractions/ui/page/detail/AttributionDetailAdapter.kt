@@ -5,24 +5,15 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.shengkai.attractions.R
-import com.shengkai.attractions.data.AttractionData
-import com.shengkai.attractions.data.AttractionDetail
+import com.shengkai.attractions.data.remote.AttractionDetail
 import com.shengkai.attractions.databinding.ItemAttributionDetailBinding
-import com.shengkai.attractions.databinding.ItemAttributionNewsBinding
-import com.shengkai.attractions.ui.news.AttributionNewsAdapter
 import com.shengkai.attractions.util.GlideLoadUtil
 
 class AttributionDetailAdapter(
     private val onAttractionClick: (AttractionDetail) -> Unit
 ) : RecyclerView.Adapter<AttributionDetailAdapter.AttractionDetailViewHolder>() {
 
-    private var attractionList: List<AttractionDetail> = emptyList()
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun setAttractionDetailList(list: List<AttractionDetail>) {
-        attractionList = list
-        notifyDataSetChanged()
-    }
+    private var attractionList: MutableList<AttractionDetail> = mutableListOf()
 
     // define ViewHolder
     class AttractionDetailViewHolder(private val binding: ItemAttributionDetailBinding) :
@@ -64,5 +55,16 @@ class AttributionDetailAdapter(
 
     override fun getItemCount(): Int {
         return attractionList.size
+    }
+
+    fun addAttractionDetailData(list: List<AttractionDetail>) {
+        attractionList.addAll(list)
+        notifyItemRangeInserted(attractionList.size - 1, list.size)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun clearDetailData(){
+        attractionList.clear()
+        notifyDataSetChanged()
     }
 }

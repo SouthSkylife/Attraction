@@ -78,6 +78,9 @@ class WebViewBoardPage : Fragment() {
         loadNewsWebView()
     }
 
+    /**
+     * setUp init webView
+     */
     @SuppressLint("SetJavaScriptEnabled")
     private fun setUpWebView() {
         binding.webView.settings.apply {
@@ -118,6 +121,9 @@ class WebViewBoardPage : Fragment() {
         }
     }
 
+    /**
+     * load webView
+     */
     private fun loadNewsWebView() {
         if (boardUrl.isNotEmpty()) {
             if (isFirstLoad) {

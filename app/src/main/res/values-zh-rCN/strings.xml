@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">游憩景点</string>
+    <string name="txt_travel_taipei">悠游台北</string>
+    <string name="txt_taipei_attribution">台北市景点</string>
+    <string name="txt_latest_news">最新消息</string>
+    <string name="txt_travel_attribution">游憩景点</string>
+    <string name="txt_no_news_error_hint">目前没有任何新消息！</string>
+    <string name="txt_select_language">選擇語言</string>
+
+    <string name="txt_business_hour">营业时间：</string>
+    <string name="txt_business_address">营业地址：</string>
+    <string name="txt_contact_number">联络电话：</string>
+    <string name="txt_reference_url">参考网址：</string>
+
+</resources>

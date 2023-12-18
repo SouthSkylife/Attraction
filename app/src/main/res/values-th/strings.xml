@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">สถานที่ท่องเที่ยว</string>
+    <string name="txt_travel_taipei">เที่ยวไทเปแบบสบายๆ</string>
+    <string name="txt_taipei_attribution">สถานที่ท่องเที่ยวเมืองไทเป</string>
+    <string name="txt_latest_news">ข่าวล่าสุด</string>
+    <string name="txt_travel_attribution">สถานที่ท่องเที่ยว</string>
+    <string name="txt_no_news_error_hint">ไม่มีข่าวใหม่ในขณะนี้!</string>
+    <string name="txt_select_language">เลือกภาษา</string>
+
+    <string name="txt_business_hour">เวลาทำการ：</string>
+    <string name="txt_business_address">ที่อยู่ บริษัท：</string>
+    <string name="txt_contact_number">เบอร์ติดต่อ：</string>
+    <string name="txt_reference_url">URL อ้างอิง：</string>
+
+</resources>

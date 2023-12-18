@@ -1,11 +1,11 @@
-package com.shengkai.attractions.data
+package com.shengkai.attractions.data.remote
 
 data class AttributionNewsModel(
     val total: Int,
-    val data: List<AttractionData>
+    val data: List<AttractionNewsData>
 )
 
-data class AttractionData(
+data class AttractionNewsData(
     val id: Int,
     val title: String,
     val description: String,

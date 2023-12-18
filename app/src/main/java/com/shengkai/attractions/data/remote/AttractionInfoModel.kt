@@ -1,4 +1,4 @@
-package com.shengkai.attractions.data
+package com.shengkai.attractions.data.remote
 
 import com.google.gson.annotations.SerializedName
 
@@ -12,7 +12,7 @@ data class AttractionDetail(
     val name: String,
     val introduction: String,
     @SerializedName("open_time")
-    val openTime:String,
+    val openTime: String,
     val zipcode: String,
     val address: String,
     val tel: String,

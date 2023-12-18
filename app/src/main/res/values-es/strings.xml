@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Atracciones</string>
+    <string name="txt_travel_taipei">Viaja tranquilamente por Taipei</string>
+    <string name="txt_taipei_attribution">Atracciones de la ciudad de Taipéi</string>
+    <string name="txt_latest_news">últimas noticias</string>
+    <string name="txt_travel_attribution">Atracciones</string>
+    <string name="txt_no_news_error_hint">¡No hay novedades por el momento!</string>
+    <string name="txt_select_language">Elige un idioma</string>
+
+    <string name="txt_business_hour">Horas de trabajo：</string>
+    <string name="txt_business_address">Dirección de Negocios：</string>
+    <string name="txt_contact_number">Número de contacto：</string>
+    <string name="txt_reference_url">URL de referencia：</string>
+
+</resources>

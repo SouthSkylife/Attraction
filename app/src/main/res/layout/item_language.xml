@@ -27,7 +27,6 @@
                 android:id="@+id/tvLanguage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="繁體中文"
                 android:textSize="18sp"
                 android:textColor="@color/color_moon_grey"
                 app:layout_constraintBottom_toBottomOf="parent"

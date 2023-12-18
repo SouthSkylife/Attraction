@@ -1,33 +1,24 @@
 package com.shengkai.attractions.ui.news
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.shengkai.attractions.data.AttractionData
-import com.shengkai.attractions.data.AttributionNewsModel
+import com.shengkai.attractions.data.remote.AttractionNewsData
 import com.shengkai.attractions.databinding.ItemAttributionNewsBinding
-import com.shengkai.attractions.util.GlideLoadUtil
 
 class AttributionNewsAdapter (
-    private val onAttractionClick: (String) -> Unit
+    private val onAttractionNewsClick: (String) -> Unit
 ) : RecyclerView.Adapter<AttributionNewsAdapter.AttractionViewHolder>() {
 
-    private var attractionList: List<AttractionData> = emptyList()
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun setAttractionList(list: List<AttractionData>) {
-        attractionList = list
-        notifyDataSetChanged()
-    }
+    private var attractionNewsList: List<AttractionNewsData> = emptyList()
 
     // define ViewHolder
     class AttractionViewHolder(private val binding: ItemAttributionNewsBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         // insert data to view
-        fun bind(attraction: AttractionData, onAttractionClick: (String) -> Unit) {
+        fun bind(attraction: AttractionNewsData, onAttractionClick: (String) -> Unit) {
             binding.tvNewsTitle.text = attraction.title
             binding.tvNewsContent.text = attraction.description
 
@@ -45,10 +36,16 @@ class AttributionNewsAdapter (
     }
 
     override fun onBindViewHolder(holder: AttractionViewHolder, position: Int) {
-        holder.bind(attractionList[position], onAttractionClick)
+        holder.bind(attractionNewsList[position], onAttractionNewsClick)
     }
 
     override fun getItemCount(): Int {
-        return attractionList.size
+        return attractionNewsList.size
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun setAttractionNews(list: List<AttractionNewsData>) {
+        attractionNewsList = list
+        notifyDataSetChanged()
     }
 }

@@ -78,6 +78,9 @@ class AttributionNewsPage : Fragment() {
         loadNewsWebView()
     }
 
+    /**
+     * setUp init webView
+     */
     @SuppressLint("SetJavaScriptEnabled")
     private fun setUpWebView() {
         binding.webView.settings.apply {
@@ -118,6 +121,9 @@ class AttributionNewsPage : Fragment() {
         }
     }
 
+    /**
+     * load webView
+     */
     private fun loadNewsWebView() {
         if (newsUrl.isNotEmpty()) {
             if(isFirstLoad){

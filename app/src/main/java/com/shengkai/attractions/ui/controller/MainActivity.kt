@@ -1,35 +1,57 @@
 package com.shengkai.attractions.ui.controller
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.shengkai.attractions.R
 import com.shengkai.attractions.base.iFragmentTransactionCallback
 import com.shengkai.attractions.common.constant.FragmentAnim
 import com.shengkai.attractions.common.dialog.LanguageSelectionDialog
-import com.shengkai.attractions.data.AttractionDetail
+import com.shengkai.attractions.common.dialog.LoadingDialog
+import com.shengkai.attractions.data.local.ApplicationSp
+import com.shengkai.attractions.data.remote.AttractionDetail
 import com.shengkai.attractions.databinding.ActivityMainBinding
 import com.shengkai.attractions.ui.detail.AttributionDetailAdapter
 import com.shengkai.attractions.ui.news.AttributionNewsAdapter
 import com.shengkai.attractions.ui.page.detail.AttributionDetailPage
 import com.shengkai.attractions.ui.page.news.AttributionNewsPage
 import com.shengkai.attractions.ui.page.web.WebViewBoardPage
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
+/**
+ * 主畫面(最新消息/遊憩景點/多國語系切換)
+ */
 class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainActivityViewModel
     private lateinit var attractionNewsAdapter: AttributionNewsAdapter
     private lateinit var attractionDetailAdapter: AttributionDetailAdapter
+    private lateinit var layoutManager: LinearLayoutManager
+    private var isLoadMoreLoading = false
     private var isFirstLoad: Boolean = true
+    private var dialog = LoadingDialog()
+    private var canKeepLoad: Boolean = true
 
     private var fragmentManager: FragmentManager = supportFragmentManager
 
@@ -37,51 +59,74 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         const val TAG = "MainActivity"
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init()
         initNewsComponent()
-        initDetailComponent()
+        initAttractionsComponent()
         registerListener()
         bindObserver()
     }
 
     override fun onStart() {
         super.onStart()
+
         if (isFirstLoad) {
+            viewModel.attractionInfoPage = 1
             isFirstLoad = false
-            binding.progressBar.visibility = View.VISIBLE
-            viewModel.getAttributionNews()
-            viewModel.getAttributionList()
+            showLoadingDialog()
+            viewModel.getAttributionNews(this)
+            viewModel.getAttributionList(this)
         }
     }
 
     //-------------------------------------- init ----------------------------------------------//
 
+    /**
+     * 初始化
+     */
     private fun init() {
         // 初始化 Data Binding
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.lifecycleOwner = this
         //獲取 ViewModel
         viewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
+        setLanguageLocale()
     }
 
+    /**
+     * 綁定觀察者
+     */
     @SuppressLint("SetTextI18n")
     private fun bindObserver() {
         //台北市最新消息
         viewModel.attributionNewsData.observe(this) {
-            attractionNewsAdapter.setAttractionList(it.data)
+            binding.tvNoNewsHint.visibility = if (it.data.isEmpty()) View.VISIBLE else View.GONE
+            attractionNewsAdapter.setAttractionNews(
+                if (it.data.size > 3) it.data.subList(0, 3) else it.data
+            )
         }
 
         //台北市景點
-        viewModel.attractionInfoData.observe(
+        viewModel.attractionListData.observe(
             this
         ) {
-            binding.progressBar.visibility = View.GONE
-            binding.tvAttributionCount.text =
-                "台北市景點 ${viewModel.attractionInfoPage}/${it.total}"
-            attractionDetailAdapter.setAttractionDetailList(it.data)
+            if(viewModel.isLockListWorking){
+                binding.tvCount.text = "${viewModel.attractionInfoPage}/${it.total}"
+                attractionDetailAdapter.addAttractionDetailData(it.data)
+
+                isLoadMoreLoading = false
+                canKeepLoad = it.data.isNotEmpty()
+
+                if (canKeepLoad) {
+                    viewModel.attractionInfoPage += 1
+                }
+
+                cancelLoadingDialog()
+
+                viewModel.isLockListWorking = false
+            }
+
         }
     }
 
@@ -91,7 +136,6 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     private fun initNewsComponent() {
         // 初始化 Adapter，並設置點擊監聽器
         attractionNewsAdapter = AttributionNewsAdapter { newsUrl: String ->
-            //println("最新消息網址${newsUrl}")
             jumpToAttributionNewsPage(newsUrl)
         }
 
@@ -103,38 +147,63 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     }
 
     /**
-     * 初始化最新消息組件
+     * 初始化遊憩景點組件
      */
-    private fun initDetailComponent() {
+    private fun initAttractionsComponent() {
         // 初始化 Adapter，並設置點擊監聽器
         attractionDetailAdapter = AttributionDetailAdapter { detail: AttractionDetail ->
-            //println("景觀網址${detail.url}")
             jumpToAttributionDetailPage(detail)
         }
 
         // 設置 RecyclerView 的 Adapter
         binding.rcyAttribution.adapter = attractionDetailAdapter
 
-        // 設置 RecyclerView 的 LayoutManager（這裡使用 LinearLayoutManager）
-        binding.rcyAttribution.layoutManager = LinearLayoutManager(this)
+        // 設置 RecyclerView 的 LayoutManager
+        layoutManager = LinearLayoutManager(this)
+        binding.rcyAttribution.layoutManager = layoutManager
     }
 
-    private fun registerListener(){
+    /**
+     * 註冊監聽者(滾動加載監聽、語言選擇)
+     */
+    private fun registerListener() {
         binding.ivLanguage.setOnClickListener {
             showLanguageSelectDialog()
         }
-    }
 
-    //-------------------------------------- Action------- --------------------------------------//
-
-    private fun jumpToAttributionNewsPage(newsUrl: String) {
-        addFragment(AttributionNewsPage().apply {
-            arguments = Bundle().apply {
-                putString(WebViewBoardPage.WEB_BOARD_URL_KEY, newsUrl)
+        binding.nestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener
+        { v, _, scrollY, _, _ ->
+            if (scrollY == (v.getChildAt(0).measuredHeight - v.measuredHeight)) {
+                // 接近底部，執行你的操作
+                if (!isLoadMoreLoading && canKeepLoad) {
+                    showLoadingDialog()
+                    isLoadMoreLoading = true
+                    viewModel.getAttributionList(this)
+                }
             }
         })
     }
 
+    //-------------------------------------- Action------- --------------------------------------//
+
+    /**
+     * 跳轉最新消息
+     */
+    private fun jumpToAttributionNewsPage(newsUrl: String) {
+        addFragment(WebViewBoardPage().apply {
+            arguments = Bundle().apply {
+                putString(WebViewBoardPage.WEB_BOARD_URL_KEY, newsUrl)
+                putString(
+                    WebViewBoardPage.WEB_BOARD_TITLE_KEY,
+                    binding.tvLatestNewsTag.text.toString()
+                )
+            }
+        })
+    }
+
+    /**
+     * 跳轉景點細節
+     */
     private fun jumpToAttributionDetailPage(detail: AttractionDetail) {
         addFragment(AttributionDetailPage().apply {
             arguments = Bundle().apply {
@@ -143,9 +212,82 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         })
     }
 
-    private fun showLanguageSelectDialog(){
-        val dialog = LanguageSelectionDialog()
-        dialog.show(fragmentManager,"show")
+    /**
+     * 顯示語言選擇 dialog
+     */
+    private fun showLanguageSelectDialog() {
+        val languageDialog = LanguageSelectionDialog {
+            setLanguageLocale()
+            showLoadingDialog()
+            viewModel.attractionInfoPage = 1
+            attractionDetailAdapter.clearDetailData()
+            //attractionNewsAdapter.clearAttractionNesData()
+
+            viewModel.getAttributionNews(this)
+            viewModel.getAttributionList(this)
+        }
+
+        languageDialog.show(fragmentManager, "show")
+    }
+
+    /**
+     * 設置 Application 語言
+     */
+    private fun setLanguageLocale() {
+        val localSp = ApplicationSp(this)
+
+        if (localSp.getString(ApplicationSp.CURRENT_LANGUAGE_SIGN).isEmpty()) {
+            localSp.putString(ApplicationSp.CURRENT_LANGUAGE_SIGN, "zh-tw")
+        }
+
+        val language = localSp.getString(ApplicationSp.CURRENT_LANGUAGE_SIGN)
+
+        val locale: Locale = if (language.contains("-")) {
+            val (lang, country) = language.split("-")
+            Locale(lang, country)
+        } else {
+            Locale(language, "")
+        }
+
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        resetAllComponentLanguage()
+    }
+
+    /**
+     * 重製各組件對應的語言
+     */
+    private fun resetAllComponentLanguage() {
+        binding.tvTitle.text = getString(R.string.txt_travel_taipei)
+        binding.tvCountTitle.text = getString(R.string.txt_taipei_attribution)
+        binding.tvLatestNewsTag.text = getString(R.string.txt_latest_news)
+        binding.tvAttributionTag.text = getString(R.string.txt_travel_attribution)
+        binding.tvNoNewsHint.text = getString(R.string.txt_no_news_error_hint)
+    }
+
+    /**
+     * 顯示 loading
+     */
+    private fun showLoadingDialog() {
+        dialog.show(fragmentManager, "show")
+    }
+
+    /**
+     * 關閉 loading
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    fun cancelLoadingDialog() {
+        GlobalScope.launch {
+            delay(1500)
+            withContext(Dispatchers.Main) {
+                // 在主線程執行你的操作
+                dialog.cancel()
+            }
+        }
     }
 
     //---------------------------------- Fragment Handle ----------------------------------------//
@@ -192,6 +334,5 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
             fragmentManager.popBackStack(backStackId, 1)
         }
     }
-
 
 }

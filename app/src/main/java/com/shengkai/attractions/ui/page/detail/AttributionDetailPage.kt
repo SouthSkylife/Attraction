@@ -13,11 +13,10 @@ import com.denzcoskun.imageslider.models.SlideModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.shengkai.attractions.R
-import com.shengkai.attractions.data.AttractionDetail
-import com.shengkai.attractions.data.Image
+import com.shengkai.attractions.data.remote.AttractionDetail
+import com.shengkai.attractions.data.remote.Image
 import com.shengkai.attractions.databinding.FragmentAttributionDetailBinding
 import com.shengkai.attractions.ui.controller.MainActivity
-import com.shengkai.attractions.ui.page.news.AttributionNewsPage
 import com.shengkai.attractions.ui.page.web.WebViewBoardPage
 
 /**
@@ -29,7 +28,6 @@ class AttributionDetailPage : Fragment() {
     private lateinit var viewModel: AttributionDetailViewModel
     private lateinit var mainActivity: MainActivity
     private lateinit var attributionJson: String
-    private var isFirstLoad: Boolean = true
 
     companion object {
         const val TAG = "AttributionDetail"
@@ -43,10 +41,6 @@ class AttributionDetailPage : Fragment() {
             mainActivity = context
         }
 
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -84,6 +78,9 @@ class AttributionDetailPage : Fragment() {
         loadAttributionDetail()
     }
 
+    /**
+     * 填入景觀資料
+     */
     private fun loadAttributionDetail() {
         if (attributionJson.isNotEmpty()) {
             val type = object : TypeToken<AttractionDetail>() {}.type
@@ -91,12 +88,12 @@ class AttributionDetailPage : Fragment() {
                 Gson().fromJson(attributionJson, type)
 
             binding.apply {
-                tvTitle.text = detail.name
-                tvDetailOpen.text = detail.openTime
-                tvDetailAddress.text = detail.address
-                tvDetailPhone.text = detail.tel
-                tvDetailUrl.text = detail.url
-                tvDetailContent.text = detail.introduction
+                tvTitle.text = detail.name.ifEmpty { "---" }
+                tvDetailOpen.text = detail.openTime.ifEmpty { "---" }
+                tvDetailAddress.text = detail.address.ifEmpty { "---" }
+                tvDetailPhone.text = detail.tel.ifEmpty { "---" }
+                tvDetailUrl.text = detail.url.ifEmpty { "---" }
+                tvDetailContent.text = detail.introduction.ifEmpty { "---" }
                 tvDetailUrl.setOnClickListener {
                     jumpToReferWebPage(detail.url, detail.name)
                 }
@@ -106,6 +103,9 @@ class AttributionDetailPage : Fragment() {
         }
     }
 
+    /**
+     * 跳轉景觀參考網址
+     */
     private fun jumpToReferWebPage(referUrl: String, attributionTitle: String) {
         mainActivity.addFragment(WebViewBoardPage().apply {
             arguments = Bundle().apply {
@@ -115,10 +115,16 @@ class AttributionDetailPage : Fragment() {
         })
     }
 
-    private fun insertAttributionImgList(photos : List<Image>){
+    /**
+     * 填入景觀多張圖片輪播
+     */
+    private fun insertAttributionImgList(photos: List<Image>) {
+        binding.ivEmptySlider.visibility = if (photos.isEmpty()) View.VISIBLE else View.GONE
+        binding.imageSlider.visibility = if (photos.isEmpty()) View.GONE else View.VISIBLE
+
         val imageList = ArrayList<SlideModel>()
 
-        photos.forEach{
+        photos.forEach {
             imageList.add(SlideModel(it.src, ScaleTypes.CENTER_CROP))
         }
 

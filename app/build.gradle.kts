@@ -26,7 +26,6 @@ android {
     buildTypes {
         debug {
             isMinifyEnabled = false
-            resValue("string", "empty", "0000000")
         }
 
         release {
@@ -35,8 +34,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-
-            resValue("string", "empty", "")
         }
     }
     compileOptions {
@@ -82,4 +79,6 @@ dependencies {
     implementation("com.github.bumptech.glide:compiler:4.12.0")
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
 
+//    //加密 - preferences
+    implementation("com.pddstudio:encrypted-preferences:1.3.0")
 }

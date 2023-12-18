@@ -1,15 +1,14 @@
 package com.shengkai.attractions.common.adapter
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.shengkai.attractions.R
 import com.shengkai.attractions.common.constant.LanguageEnum
-import com.shengkai.attractions.data.AttractionDetail
-import com.shengkai.attractions.databinding.ItemAttributionDetailBinding
+import com.shengkai.attractions.data.local.ApplicationSp
 import com.shengkai.attractions.databinding.ItemLanguageBinding
-import com.shengkai.attractions.util.GlideLoadUtil
 
 class LanguageSelectAdapter(
     private val onLanguageClick: (LanguageEnum) -> Unit
@@ -29,6 +28,22 @@ class LanguageSelectAdapter(
             binding.tvLanguage.setOnClickListener {
                 onLanguageClick(languageSign)
             }
+
+            val recentLanguage =
+                ApplicationSp(binding.root.context).getString(ApplicationSp.CURRENT_LANGUAGE_SIGN)
+
+            val context = binding.root.context
+            val textColorWhite = ContextCompat.getColor(context, R.color.white)
+            val textColorGrey = ContextCompat.getColor(context, R.color.color_moon_grey)
+
+            val (bgColor, textColor) = if (languageSign.languageSign == recentLanguage) {
+                R.drawable.shape_ocean_blue_tag_bg to textColorWhite
+            } else {
+                android.R.color.white to textColorGrey
+            }
+
+            binding.llLanguage.setBackgroundResource(bgColor)
+            binding.tvLanguage.setTextColor(textColor)
 
             binding.executePendingBindings()
         }
