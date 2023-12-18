@@ -78,6 +78,9 @@ class AttributionDetailPage : Fragment() {
         loadAttributionDetail()
     }
 
+    /**
+     * 填入景觀資料
+     */
     private fun loadAttributionDetail() {
         if (attributionJson.isNotEmpty()) {
             val type = object : TypeToken<AttractionDetail>() {}.type
@@ -100,6 +103,9 @@ class AttributionDetailPage : Fragment() {
         }
     }
 
+    /**
+     * 跳轉景觀參考網址
+     */
     private fun jumpToReferWebPage(referUrl: String, attributionTitle: String) {
         mainActivity.addFragment(WebViewBoardPage().apply {
             arguments = Bundle().apply {
@@ -109,6 +115,9 @@ class AttributionDetailPage : Fragment() {
         })
     }
 
+    /**
+     * 填入景觀多張圖片輪播
+     */
     private fun insertAttributionImgList(photos: List<Image>) {
         binding.ivEmptySlider.visibility = if (photos.isEmpty()) View.VISIBLE else View.GONE
         binding.imageSlider.visibility = if (photos.isEmpty()) View.GONE else View.VISIBLE

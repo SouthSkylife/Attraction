@@ -82,6 +82,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
     //-------------------------------------- init ----------------------------------------------//
 
+    /**
+     * 初始化
+     */
     private fun init() {
         // 初始化 Data Binding
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -91,6 +94,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         setLanguageLocale()
     }
 
+    /**
+     * 綁定觀察者
+     */
     @SuppressLint("SetTextI18n")
     private fun bindObserver() {
         //台北市最新消息
@@ -157,6 +163,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.rcyAttribution.layoutManager = layoutManager
     }
 
+    /**
+     * 註冊監聽者(滾動加載監聽、語言選擇)
+     */
     private fun registerListener() {
         binding.ivLanguage.setOnClickListener {
             showLanguageSelectDialog()
@@ -177,6 +186,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
     //-------------------------------------- Action------- --------------------------------------//
 
+    /**
+     * 跳轉最新消息
+     */
     private fun jumpToAttributionNewsPage(newsUrl: String) {
         addFragment(WebViewBoardPage().apply {
             arguments = Bundle().apply {
@@ -189,6 +201,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         })
     }
 
+    /**
+     * 跳轉景點細節
+     */
     private fun jumpToAttributionDetailPage(detail: AttractionDetail) {
         addFragment(AttributionDetailPage().apply {
             arguments = Bundle().apply {
@@ -197,6 +212,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         })
     }
 
+    /**
+     * 顯示語言選擇 dialog
+     */
     private fun showLanguageSelectDialog() {
         val languageDialog = LanguageSelectionDialog {
             setLanguageLocale()
@@ -212,6 +230,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         languageDialog.show(fragmentManager, "show")
     }
 
+    /**
+     * 設置 Application 語言
+     */
     private fun setLanguageLocale() {
         val localSp = ApplicationSp(this)
 
@@ -237,6 +258,9 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         resetAllComponentLanguage()
     }
 
+    /**
+     * 重製各組件對應的語言
+     */
     private fun resetAllComponentLanguage() {
         binding.tvTitle.text = getString(R.string.txt_travel_taipei)
         binding.tvCountTitle.text = getString(R.string.txt_taipei_attribution)
@@ -245,10 +269,16 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.tvNoNewsHint.text = getString(R.string.txt_no_news_error_hint)
     }
 
+    /**
+     * 顯示 loading
+     */
     private fun showLoadingDialog() {
         dialog.show(fragmentManager, "show")
     }
 
+    /**
+     * 關閉 loading
+     */
     @OptIn(DelicateCoroutinesApi::class)
     fun cancelLoadingDialog() {
         GlobalScope.launch {
