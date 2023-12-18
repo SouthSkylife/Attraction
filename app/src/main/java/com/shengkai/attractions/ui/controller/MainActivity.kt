@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.NestedScrollView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -20,6 +21,7 @@ import com.shengkai.attractions.R
 import com.shengkai.attractions.base.iFragmentTransactionCallback
 import com.shengkai.attractions.common.constant.FragmentAnim
 import com.shengkai.attractions.common.dialog.LanguageSelectionDialog
+import com.shengkai.attractions.common.dialog.LoadingDialog
 import com.shengkai.attractions.data.local.ApplicationSp
 import com.shengkai.attractions.data.remote.AttractionDetail
 import com.shengkai.attractions.databinding.ActivityMainBinding
@@ -28,6 +30,12 @@ import com.shengkai.attractions.ui.news.AttributionNewsAdapter
 import com.shengkai.attractions.ui.page.detail.AttributionDetailPage
 import com.shengkai.attractions.ui.page.news.AttributionNewsPage
 import com.shengkai.attractions.ui.page.web.WebViewBoardPage
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 /**
@@ -40,7 +48,10 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     private lateinit var attractionNewsAdapter: AttributionNewsAdapter
     private lateinit var attractionDetailAdapter: AttributionDetailAdapter
     private lateinit var layoutManager: LinearLayoutManager
+    private var isLoadMoreLoading = false
     private var isFirstLoad: Boolean = true
+    private var dialog = LoadingDialog()
+    private var canKeepLoad: Boolean = true
 
     private var fragmentManager: FragmentManager = supportFragmentManager
 
@@ -59,9 +70,11 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
 
     override fun onStart() {
         super.onStart()
+
         if (isFirstLoad) {
+            viewModel.attractionInfoPage = 1
             isFirstLoad = false
-            binding.progressBar.visibility = View.VISIBLE
+            showLoadingDialog()
             viewModel.getAttributionNews(this)
             viewModel.getAttributionList(this)
         }
@@ -83,18 +96,31 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         //台北市最新消息
         viewModel.attributionNewsData.observe(this) {
             binding.tvNoNewsHint.visibility = if (it.data.isEmpty()) View.VISIBLE else View.GONE
-            attractionNewsAdapter.setAttractionList(
+            attractionNewsAdapter.setAttractionNews(
                 if (it.data.size > 3) it.data.subList(0, 3) else it.data
             )
         }
 
         //台北市景點
-        viewModel.attractionInfoData.observe(
+        viewModel.attractionListData.observe(
             this
         ) {
-            binding.progressBar.visibility = View.GONE
-            binding.tvCount.text = "${viewModel.attractionInfoPage}/${it.total}"
-            attractionDetailAdapter.setAttractionDetailList(it.data)
+            if(viewModel.isLockListWorking){
+                binding.tvCount.text = "${viewModel.attractionInfoPage}/${it.total}"
+                attractionDetailAdapter.addAttractionDetailData(it.data)
+
+                isLoadMoreLoading = false
+                canKeepLoad = it.data.isNotEmpty()
+
+                if (canKeepLoad) {
+                    viewModel.attractionInfoPage += 1
+                }
+
+                cancelLoadingDialog()
+
+                viewModel.isLockListWorking = false
+            }
+
         }
     }
 
@@ -126,7 +152,7 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         // 設置 RecyclerView 的 Adapter
         binding.rcyAttribution.adapter = attractionDetailAdapter
 
-        // 設置 RecyclerView 的 LayoutManager（這裡使用 LinearLayoutManager）
+        // 設置 RecyclerView 的 LayoutManager
         layoutManager = LinearLayoutManager(this)
         binding.rcyAttribution.layoutManager = layoutManager
     }
@@ -135,6 +161,18 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.ivLanguage.setOnClickListener {
             showLanguageSelectDialog()
         }
+
+        binding.nestedScrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener
+        { v, _, scrollY, _, _ ->
+            if (scrollY == (v.getChildAt(0).measuredHeight - v.measuredHeight)) {
+                // 接近底部，執行你的操作
+                if (!isLoadMoreLoading && canKeepLoad) {
+                    showLoadingDialog()
+                    isLoadMoreLoading = true
+                    viewModel.getAttributionList(this)
+                }
+            }
+        })
     }
 
     //-------------------------------------- Action------- --------------------------------------//
@@ -160,14 +198,18 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
     }
 
     private fun showLanguageSelectDialog() {
-        val dialog = LanguageSelectionDialog {
+        val languageDialog = LanguageSelectionDialog {
             setLanguageLocale()
-            binding.progressBar.visibility = View.VISIBLE
+            showLoadingDialog()
+            viewModel.attractionInfoPage = 1
+            attractionDetailAdapter.clearDetailData()
+            //attractionNewsAdapter.clearAttractionNesData()
+
             viewModel.getAttributionNews(this)
             viewModel.getAttributionList(this)
         }
 
-        dialog.show(fragmentManager, "show")
+        languageDialog.show(fragmentManager, "show")
     }
 
     private fun setLanguageLocale() {
@@ -201,6 +243,21 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
         binding.tvLatestNewsTag.text = getString(R.string.txt_latest_news)
         binding.tvAttributionTag.text = getString(R.string.txt_travel_attribution)
         binding.tvNoNewsHint.text = getString(R.string.txt_no_news_error_hint)
+    }
+
+    private fun showLoadingDialog() {
+        dialog.show(fragmentManager, "show")
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun cancelLoadingDialog() {
+        GlobalScope.launch {
+            delay(1500)
+            withContext(Dispatchers.Main) {
+                // 在主線程執行你的操作
+                dialog.cancel()
+            }
+        }
     }
 
     //---------------------------------- Fragment Handle ----------------------------------------//
@@ -247,6 +304,5 @@ class MainActivity : AppCompatActivity(), iFragmentTransactionCallback {
             fragmentManager.popBackStack(backStackId, 1)
         }
     }
-
 
 }

@@ -13,14 +13,7 @@ class AttributionDetailAdapter(
     private val onAttractionClick: (AttractionDetail) -> Unit
 ) : RecyclerView.Adapter<AttributionDetailAdapter.AttractionDetailViewHolder>() {
 
-    private var attractionList: List<AttractionDetail> = emptyList()
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun setAttractionDetailList(list: List<AttractionDetail>) {
-        attractionList = list
-        notifyDataSetChanged()
-        //notifyItemRangeInserted(attractionList.size - 1, list.size)
-    }
+    private var attractionList: MutableList<AttractionDetail> = mutableListOf()
 
     // define ViewHolder
     class AttractionDetailViewHolder(private val binding: ItemAttributionDetailBinding) :
@@ -62,5 +55,16 @@ class AttributionDetailAdapter(
 
     override fun getItemCount(): Int {
         return attractionList.size
+    }
+
+    fun addAttractionDetailData(list: List<AttractionDetail>) {
+        attractionList.addAll(list)
+        notifyItemRangeInserted(attractionList.size - 1, list.size)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun clearDetailData(){
+        attractionList.clear()
+        notifyDataSetChanged()
     }
 }
